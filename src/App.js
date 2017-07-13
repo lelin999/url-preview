@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import Link from "./Components/Link/Link.js";
 
-let suffixes = [".com", ".gov", ".net", ".ly", ".io"];
+let suffixes = [".com", ".gov", ".net"];
 
 class App extends Component {
   constructor(props) {
@@ -15,17 +15,25 @@ class App extends Component {
   }
 
   check() {
-      if (this.state.text.indexOf(".com") === -1) {
-        this.setState({link: ''});
+    let textStr = this.state.text;
+    let acceptable;
+    for (let elem of suffixes) {
+      acceptable = textStr.indexOf(elem);
+      if (acceptable > -1) {
+        let n = textStr.lastIndexOf(" ", acceptable);
+        let linkStr = textStr.substring(n, acceptable + 4);
+        this.setState({link: linkStr});
+        break;
       } else {
-        this.setState({link: "www.google.com"})
+        this.setState({link: ''});
       }
+    }
   }
 
   handleChange(event) {
     let val = event.target.value;
-    this.setState({text: val, link: ""})
-    this.check()
+    this.setState({text: val});
+    this.check();
   }
 
   test() {
