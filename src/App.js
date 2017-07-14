@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 
 import Link from "./Components/Link/Link.js";
+import "./App.css";
 
-let suffixes = [".com", ".gov", ".net"];
+let suffixes = [".com", ".gov", ".net", ".org"];
 
 class App extends Component {
   constructor(props) {
@@ -12,17 +13,21 @@ class App extends Component {
       link: ''
     }
     this.handleChange = this.handleChange.bind(this);
+    window.state = () => { console.log (this.state) }
   }
 
-  check() {
-    let textStr = this.state.text;
+  check(textStr) {
     let acceptable;
     for (let elem of suffixes) {
       acceptable = textStr.indexOf(elem);
       if (acceptable > -1) {
         let n = textStr.lastIndexOf(" ", acceptable);
-        let linkStr = textStr.substring(n, acceptable + 4);
-        this.setState({link: linkStr});
+        let linkStr = textStr.substring(n + 1, acceptable + 4);
+        if (!linkStr.includes("http://")) {
+          this.setState({link: `http://${linkStr}`});
+        } else {
+          this.setState({link: linkStr});  
+        }
         break;
       } else {
         this.setState({link: ''});
@@ -33,11 +38,7 @@ class App extends Component {
   handleChange(event) {
     let val = event.target.value;
     this.setState({text: val});
-    this.check();
-  }
-
-  test() {
-    console.log(this.state);
+    this.check(val);
   }
 
   render() {
@@ -53,7 +54,6 @@ class App extends Component {
             onChange={this.handleChange}
           />
         </div>
-        {this.test()}
         { this.state.link ? <Link linkFromParent={ linkURL } /> : null }
       </div>
     )
@@ -61,10 +61,3 @@ class App extends Component {
 };
 
 export default App;
-
-//{event => this.setState({text: event.target.value})}
-
-//algorithm should look for the string that ends in those things
-//use .indexOf, then find the first whitespace before that
-//index of whitespace to either index of next whitespace or end
-//needs a redirect

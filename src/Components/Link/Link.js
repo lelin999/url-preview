@@ -1,41 +1,64 @@
 import React, { Component } from 'react';
-import { Helmet } from 'react-helmet';
 import Axios from 'axios';
+import Metascraper from 'metascraper';
+
+import "./Link.css";
 
 class Link extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      link: this.props.linkFromParent
+      link: this.props.linkFromParent,
+      err: '',
+      title: '',
+      description: '',
+      image: ''
     }
   }
 
   render() {
-    let linkText = '';
-    if (this.state.link.indexOf("https://") === -1) {
-      linkText = `https://${this.state.link}`;  
-    } else {
-      linkText = `${this.state.link}`;
-    }
-    
     return (
       <div className="link">
-        <Helmet>
-        <meta charSet="utf-8" />
-          <title>{linkText}</title>
-          <meta property="og:title" content="The Rock" />
-          <meta property="og:type" content="video.movie" />
-          <meta property="og:url" content="http://www.imdb.com/title/tt0117500/" />
-          <meta property="og:image" content="http://ia.media-imdb.com/images/rock.jpg" />
-        </Helmet>
-        <div className="linktext">
-          <a href={linkText}>{this.state.link}</a>
-        </div>
-        <div className="image">
-          
-        </div>
+        <a href={this.state.link}>
+          <div className="image">
+            <img src={this.state.image} height="100" width="100" />
+          </div>
+          <div className="text">
+            <div className="title">
+              <h4>{this.state.title}</h4>
+            </div>
+            <div className="description">
+              <h6>{this.state.description}</h6>
+            </div>
+            <div className="url">
+              <h6>{this.state.link}</h6>
+            </div>
+          </div>
+        </a>
       </div>
     )
+  }
+
+
+  getTitle(text) {
+    return text.match('<title>(.*)?</title>')[1];
+  }
+
+  componentDidMount() {
+    Axios.get(this.state.link).then((res) => {
+      this.setState({
+        title: this.getTitle(res.data)
+      })
+    }).catch((err) => {
+      this.setState({err});
+      console.log(this.state);
+    })
+
+    Metascraper
+      .scrapeUrl(this.state.link)
+      .then((metadata) => {
+        this.setState({title: metadata.title, description: metadata.description, image: metadata.image})
+    })
   }
 }
 
